@@ -1,0 +1,41 @@
+import pandas as pd
+import os
+
+
+#sample sheet 
+sample_sheet = "//scratch/shahlab_tmp/sbeatty/ind231/sample_info.csv"
+python27_alias = "python2"
+stelka2_path = "/ssd/sda1/sbeatty/software/strelka-2.9.10.centos6_x86_64/bin/"
+df = pd.read_csv(sample_sheet)
+working_directory = os.getcwd()
+SAMPLES = df[['SAMPLE_ID']]
+SAMPLES = SAMPLES.iloc[1]
+
+#sample sheet
+df = pd.read_csv(sample_sheet, index_col="SAMPLE_ID")
+
+rule all:
+	input:
+		expand("strelka_results/{sample}/results/variants/variants.vcf.gz", sample=SAMPLES),
+		expand("strelka_results/{sample}/runWorkflow.py", sample=SAMPLES)
+		#expand("/scratch/shahlab_tmp/sbeatty/ind231/strelka_results/{sample}/{sample}runWorkflow.py", sample=SAMPLES)
+
+rule config:
+	input:
+		bam = lambda wildcards: df.loc[wildcards.sample][1]
+	output:
+		"strelka_results/{sample}/runWorkflow.py"
+		#"/scratch/shahlab_tmp/sbeatty/ind231/strelka_results/{wildcards.sample}/{wildcards.sample}runWorkflow.py"
+	shell:
+		python27_alias + " " + stelka2_path + "configureStrelkaGermlineWorkflow.py \--bam {input.bam} \--referenceFasta /shahlab/pipelines/reference/GRCh37-lite.fa \--runDir /scratch/shahlab_tmp/sbeatty/ind231/strelka_results/{wildcards.sample}/"
+
+
+rule strelka2:
+	input:
+		"strelka_results/{sample}/runWorkflow.py"
+	output:
+		"strelka_results/{sample}/results/variants/variants.vcf.gz"
+	shell:
+		python27_alias + " " + working_directory + "/strelka_results/{wildcards.sample}/runWorkflow.py -m local -j 20"
+
+#next steps, generalize workflow 
