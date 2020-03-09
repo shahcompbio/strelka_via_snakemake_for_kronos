@@ -1,4 +1,4 @@
-# strelka_via_snakemake_for_kronos
+# Strelka_via_snakemake_for_kronos
 
 ## Dependencies 
 
@@ -9,7 +9,7 @@ Pandas 1.1.0
 
 ## Inputs:
 
-###S ample Sheet:
+### Sample Sheet:
 SAMPLE_ID,ABSOLUTE_FILE_PATH
 
 Alias or path for python 2.7 (python27_alias)
